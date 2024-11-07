@@ -174,7 +174,6 @@ class STrack(BaseTrack):
 
         self.score = new_track.score
         self.cls = new_track.cls
-        print("class!!!!!!!!!!!",self.cls)
         self.angle = new_track.angle
         self.idx = new_track.idx
 
@@ -182,38 +181,16 @@ class STrack(BaseTrack):
         """Convert a bounding box's top-left-width-height format to its x-y-aspect-height equivalent."""
         return self.tlwh_to_xyah(tlwh)
 
-    # @property
-    # def tlwh(self):
-    #     """Returns the bounding box in top-left-width-height format from the current state estimate."""
-    #     if self.mean is None:
-    #         return self._tlwh.copy()
-    #     ret = self.mean[:4].copy()
-    #     ret[2] *= ret[3]
-    #     ret[:2] -= ret[2:] / 2
-    #     return ret
-
     @property
     def tlwh(self):
-        """Get current position in bounding box format `(top left x, top left y, width, height)`.
-        
-        Returns:
-            np.ndarray: Bounding box coordinates.
-        """
+        """Returns the bounding box in top-left-width-height format from the current state estimate."""
         if self.mean is None:
             return self._tlwh.copy()
-        
         ret = self.mean[:4].copy()
-        # Ensure height is positive and non-zero
-        ret[3] = max(ret[3], 1.0)  # Minimum height of 1 pixel
-        # Calculate width using aspect ratio and height
-        ret[2] = ret[2] * ret[3]
-        # Convert center coordinates to top-left coordinates
+        ret[2] *= ret[3]
         ret[:2] -= ret[2:] / 2
-        
-        # Ensure all values are finite
-        ret = np.nan_to_num(ret, nan=0.0, posinf=1e6, neginf=0.0)
         return ret
-    
+
     @property
     def xyxy(self):
         """Converts bounding box from (top left x, top left y, width, height) to (min x, min y, max x, max y) format."""
@@ -221,33 +198,13 @@ class STrack(BaseTrack):
         ret[2:] += ret[:2]
         return ret
 
-    # @staticmethod
-    # def tlwh_to_xyah(tlwh):
-    #     """Convert bounding box from tlwh format to center-x-center-y-aspect-height (xyah) format."""
-    #     ret = np.asarray(tlwh).copy()
-    #     ret[:2] += ret[2:] / 2
-    #     ret[2] /= ret[3]
-    #     return ret
-
     @staticmethod
     def tlwh_to_xyah(tlwh):
-        """Convert bounding box to format `(center x, center y, aspect ratio, height)`.
-        
-        Args:
-            tlwh (np.ndarray): Bounding box in format `(top left x, top left y, width, height)`.
-        
-        Returns:
-            np.ndarray: Converted bounding box in format `(center x, center y, aspect ratio, height)`.
-        """
+        """Convert bounding box from tlwh format to center-x-center-y-aspect-height (xyah) format."""
         ret = np.asarray(tlwh).copy()
-        # Ensure width and height are positive and non-zero
-        ret[2:] = np.maximum(ret[2:], 1.0)  # Minimum size of 1 pixel
-        # Convert to center coordinates
         ret[:2] += ret[2:] / 2
-        # Compute aspect ratio (width/height), ensuring no division by zero
-        ret[2] = np.divide(ret[2], ret[3], out=np.zeros_like(ret[2]), where=ret[3]!=0)
+        ret[2] /= ret[3]
         return ret
-
 
     @property
     def xywh(self):
@@ -341,32 +298,12 @@ class BYTETracker:
         lost_stracks = []
         removed_stracks = []
 
-        # Handle different input types and ensure valid data
-        if isinstance(results, np.ndarray):
-            # Clean up input data
-            results = np.nan_to_num(results, nan=0.0, posinf=1e6, neginf=0.0)
-            
-            scores = results[:, 4]
-            bboxes = results[:, :4]
-            
-            # Ensure valid box dimensions
-            width = np.maximum(bboxes[:, 2] - bboxes[:, 0], 1.0)
-            height = np.maximum(bboxes[:, 3] - bboxes[:, 1], 1.0)
-            x_center = bboxes[:, 0] + width/2
-            y_center = bboxes[:, 1] + height/2
-            
-            bboxes = np.stack([x_center, y_center, width, height], axis=1)
-            cls = np.zeros(len(results))  # Single class
-            
-        else:
-            scores = results.conf
-            bboxes = results.xywhr if hasattr(results, "xywhr") else results.xywh
-            cls = np.zeros(len(results))  # Single class
-        
-        # Add index and ensure valid data
-        bboxes = np.nan_to_num(bboxes, nan=0.0, posinf=1e6, neginf=0.0)
+        scores = results.conf
+        bboxes = results.xywhr if hasattr(results, "xywhr") else results.xywh
+        # Add index
         bboxes = np.concatenate([bboxes, np.arange(len(bboxes)).reshape(-1, 1)], axis=-1)
-        
+        cls = results.cls
+
         remain_inds = scores >= self.args.track_high_thresh
         inds_low = scores > self.args.track_low_thresh
         inds_high = scores < self.args.track_high_thresh

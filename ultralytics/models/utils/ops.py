@@ -76,7 +76,7 @@ class HungarianMatcher(nn.Module):
         # We flatten to compute the cost matrices in a batch
         # [batch_size * num_queries, num_classes]
         pred_scores = pred_scores.detach().view(-1, nc)
-        pred_scores = torch.sigmoid(pred_scores) if self.use_fl else F.softmax(pred_scores, dim=-1)
+        pred_scores = F.sigmoid(pred_scores) if self.use_fl else F.softmax(pred_scores, dim=-1)
         # [batch_size * num_queries, 4]
         pred_bboxes = pred_bboxes.detach().view(-1, 4)
 
@@ -138,7 +138,7 @@ class HungarianMatcher(nn.Module):
     #         cost_mask /= self.num_sample_points
     #
     #         # dice cost
-    #         out_mask = torch.sigmoid(out_mask)
+    #         out_mask = F.sigmoid(out_mask)
     #         numerator = 2 * torch.matmul(out_mask, tgt_mask.T)
     #         denominator = out_mask.sum(-1, keepdim=True) + tgt_mask.sum(-1).unsqueeze(0)
     #         cost_dice = 1 - (numerator + 1) / (denominator + 1)

@@ -427,7 +427,7 @@ class MemoryEncoder(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Processes pixel features and masks to generate encoded memory representations for segmentation."""
         if not skip_mask_sigmoid:
-            masks = torch.sigmoid(masks)
+            masks = F.sigmoid(masks)
         masks = self.mask_downsampler(masks)
 
         # Fuse pix_feats and downsampled masks, in case the visual features are on CPU, cast them to CUDA
