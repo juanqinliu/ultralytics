@@ -171,3 +171,7 @@ calibration_*.npy
 
 results/*
 runs/*
+test_video/*
+/ultralytics/cfg/default-predict.yaml
+/ultralytics/cfg/default-train.yaml
+/ultralytics/cfg/default-val.yaml

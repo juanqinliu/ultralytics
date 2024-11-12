@@ -156,3 +156,43 @@ def fuse_score(cost_matrix: np.ndarray, detections: list) -> np.ndarray:
     det_scores = np.expand_dims(det_scores, axis=0).repeat(cost_matrix.shape[0], axis=0)
     fuse_sim = iou_sim * det_scores
     return 1 - fuse_sim  # fuse_cost
+
+def gate_cost_matrix(kf, cost_matrix, tracks, detections, only_position=False):
+    """应用卡尔曼滤波门控到代价矩阵"""
+    if cost_matrix.size == 0:
+        return cost_matrix
+        
+    gating_dim = 2 if only_position else 4
+    gating_threshold = chi2inv95[gating_dim]  # 95%置信度的卡方分布阈值
+    measurements = np.asarray([det.to_xyah() for det in detections])
+    
+    for row, track in enumerate(tracks):
+        gating_distance = kf.gating_distance(
+            track.mean, track.covariance, measurements, only_position)
+        cost_matrix[row, gating_distance > gating_threshold] = np.inf
+        
+    return cost_matrix
+
+def fuse_motion(cost_matrix, tracks, detections, lambda_=0.98):
+    """融合运动和外观信息"""
+    if cost_matrix.size == 0:
+        return cost_matrix
+        
+    # 计算运动距离
+    motion_dist = iou_distance(tracks, detections)
+    
+    # 融合外观和运动信息
+    cost_matrix = lambda_ * cost_matrix + (1 - lambda_) * motion_dist
+    return cost_matrix
+# 添加卡方分布的95%置信区间阈值
+chi2inv95 = {
+    1: 3.8415,
+    2: 5.9915,
+    3: 7.8147,
+    4: 9.4877,
+    5: 11.070,
+    6: 12.592,
+    7: 14.067,
+    8: 15.507,
+    9: 16.919
+}
