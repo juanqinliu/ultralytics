@@ -16,6 +16,7 @@ Example:
     os.system(f"onnxslim {f} {f} && open {f}")  # pip install onnxslim
     ```
 """
+from .mamba_yolo import SimpleStem, VisionClueMerge, VSSBlock, XSSBlock
 
 from .block import (
     C1,
@@ -156,4 +157,5 @@ __all__ = (
     "C2fCIB",
     "Attention",
     "PSA",
+    "SimpleStem", "VisionClueMerge", "VSSBlock", "XSSBlock"    
 )

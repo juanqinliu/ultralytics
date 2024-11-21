@@ -169,7 +169,7 @@ pnnx*
 # calibration image
 calibration_*.npy
 
-results/*
+Track_Results/*
 runs/*
 test_video/*
 /ultralytics/cfg/default-predict.yaml
