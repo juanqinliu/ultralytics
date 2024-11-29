@@ -209,8 +209,16 @@ class DeepsortTracker:
                 
                 total_time = preprocess_time + inference_time + postprocess_time
                 
-                num_dets = len(results.boxes)
-                det_description = f"{num_dets} {'drone' if num_dets == 1 else 'drones'}"
+                # 动态生成检测结果描述
+                if len(results.boxes) > 0:
+                    class_counts = {}
+                    for cls_idx in results.boxes.cls.cpu().numpy():
+                        cls_name = self.model.names[int(cls_idx)]
+                        class_counts[cls_name] = class_counts.get(cls_name, 0) + 1
+                    det_description = ", ".join([f"{count} {cls_name}" for cls_name, count in class_counts.items()])
+                else:
+                    det_description = "no objects"
+                
                 print(f"video 1/1 (frame {frame_idx+1}/{total_frames}) {video_path}: "
                     f"{imgsz[0]}x{imgsz[1]} {det_description}, {total_time:.1f}ms")
                 if show:
@@ -235,4 +243,3 @@ class DeepsortTracker:
             if save_path:
                 out.release()
             cv2.destroyAllWindows()
-

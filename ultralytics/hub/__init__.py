@@ -107,7 +107,6 @@ def export_model(model_id="", format="torchscript"):
     assert r.status_code == 200, f"{PREFIX}{format} export failure {r.status_code} {r.reason}"
     LOGGER.info(f"{PREFIX}{format} export started ✅")
 
-
 def get_export(model_id="", format="torchscript"):
     """Get an exported model dictionary with download URL."""
     assert format in export_fmts_hub(), f"Unsupported export format '{format}', valid formats are {export_fmts_hub()}"

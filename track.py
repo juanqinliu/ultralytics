@@ -16,8 +16,8 @@ class Tracker:
         track_id: str = "track1",
         imgsz: Tuple[int, int] = (384, 640)
     ):
-        self.model = RTDETR(model_path)
-        # self.model = YOLO(model_path)
+        # self.model = RTDETR(model_path)
+        self.model = YOLO(model_path)
         self.tracker_type = tracker_type
         self.conf_thres = conf_thres
         self.track_id = track_id
@@ -80,9 +80,9 @@ class Tracker:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Object Tracking with Different Trackers')
-    parser.add_argument('--model-path', type=str, default="runs/detect/train/weights/best.pt", help='Path to the YOLO model')
-    parser.add_argument('--video-path', type=str, default="/home/ljq/UAV-Tracking/Dataset/video/DJI_0003_D_S_E_test.mp4", help='Path to the input video')
-    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=[384,640], help='inference size (pixels)')
+    parser.add_argument('--model-path', type=str, default="runs/detect/mambayoyo_t7/weights/best.pt", help='Path to the YOLO model')
+    parser.add_argument('--video-path', type=str, default="test_video/DJI_0003_D_S_E_test.mp4", help='Path to the input video')
+    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=[640,640], help='inference size (pixels)')
     parser.add_argument('--tracker-type', type=str, default='deepsort', choices=['botsort', 'bytetrack', 'deepsort'], help='Type of tracker to use')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='Confidence threshold')
     parser.add_argument('--save-dir', type=str, default='Track_Results', help='Directory to save results')

@@ -17,6 +17,8 @@ Example:
     ```
 """
 from .mamba_yolo import SimpleStem, VisionClueMerge, VSSBlock, XSSBlock
+from .mamba_yolo_improve import DualPathMambaBlock
+from .CAFMFusion import SpatialAttention_CGA, ChannelAttention_CGA, PixelAttention_CGA, CGAFusion,CAFM,CAFMFusion
 
 from .block import (
     C1,
@@ -157,5 +159,7 @@ __all__ = (
     "C2fCIB",
     "Attention",
     "PSA",
-    "SimpleStem", "VisionClueMerge", "VSSBlock", "XSSBlock"    
+    "SimpleStem", "VisionClueMerge", "VSSBlock", "XSSBlock", "DualPathMambaBlock",
+    "SpatialAttention_CGA", "ChannelAttention_CGA", "PixelAttention_CGA", "CGAFusion","CAFM","CAFMFusion"
+
 )
